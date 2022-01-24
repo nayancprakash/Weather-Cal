@@ -991,17 +991,21 @@ const weatherCal = {
   // Display the date on the widget.
   async date(column) {
     const dateSettings = this.settings.date
+    const settingUrlExists = (dateSettings.url || "").length > 0
     if (!this.data.events && dateSettings.dynamicDateSize) { await this.setupEvents() }
-
+    
+    const secondsForDay = Math.floor(currentDate.getTime() / 1000) - 978307200 + (diff * 86400)
+    const dateStack = this.align(column)
+    dateStack.url = settingUrlExists ? eventSettings.url : "calshow:" + secondsForDay
     if (dateSettings.dynamicDateSize ? this.data.events.length : dateSettings.staticDateSize == "small") {
-      this.provideText(this.formatDate(this.now,dateSettings.smallDateFormat), column, this.format.smallDate, true)
+      this.provideText(this.formatDate(this.now,dateSettings.smallDateFormat), dateStack, this.format.smallDate, true)
 
     } else {
-      const dateOneStack = this.align(column)
+      const dateOneStack = this.align(dateStack)
       const dateOne = this.provideText(this.formatDate(this.now,dateSettings.largeDateLineOne), dateOneStack, this.format.largeDate1)
       dateOneStack.setPadding(this.padding/2, this.padding, 0, this.padding)
 
-      const dateTwoStack = this.align(column)
+      const dateTwoStack = this.align(dateStack)
       const dateTwo = this.provideText(this.formatDate(this.now,dateSettings.largeDateLineTwo), dateTwoStack, this.format.largeDate2)
       dateTwoStack.setPadding(0, this.padding, this.padding, this.padding)
     }
@@ -2123,7 +2127,12 @@ const weatherCal = {
         largeDateLineTwo: {
           val: "MMMM d",
           name: "Large date format, line 2",
-        }, 
+        },
+        url: {
+          val: "",
+          name: "URL to open when tapped",
+          description: "Optionally provide a URL to open when this item is tapped. Leave blank to open the built-in Calendar app.",
+        },
       },
       events: {
         name: "Events",
